@@ -1,87 +1,66 @@
-#include <thread>
-#include <queue>
-#include <condition_variable>
-#include <mutex>
-#include <atomic>
-#include <vector>
+#include <coroutine>
 #include <iostream>
-#include "matrix_event.h"
+#include <vector>
 
 using namespace std;
-using Matrix = std::vector<std::vector<int>>;
+using Matrix = vector<vector<int>>;
 
-std::queue<Task> taskQueue;
-std::mutex queueMutex;
-std::condition_variable taskAvailable;
-std::atomic<bool> stopThreads(false);
-std::condition_variable computationComplete;
-std::mutex computationMutex;
-std::atomic<int> tasksRemaining;
+struct Task {
+    int row, col;
+};
 
-void listenerThread(const Matrix &a, const Matrix &b, Matrix &result) {
-    int currentTaskRow = 0;
-    int currentTaskCol = 0;
+struct TaskGenerator {
+    struct promise_type {
+        Task currentTask;
+        auto get_return_object() { return TaskGenerator{this}; }
+        auto initial_suspend() { return suspend_always{}; }
+        auto final_suspend() noexcept { return suspend_always{}; }
+        void unhandled_exception() { std::terminate(); }
+        void return_void() {}
+        auto yield_value(Task value) {
+            currentTask = value;
+            return suspend_always{};
+        }
+    };
 
-    // Check for valid matrix dimensions
-    if(a[0].size() != b.size()) {
-        cout << "Matrix dimensions are not compatible for multiplication\n";
-        return;
+    using handle_type = std::coroutine_handle<promise_type>;
+    handle_type coro;
+
+    TaskGenerator(promise_type* p)
+            : coro(handle_type::from_promise(*p)) {}
+
+    ~TaskGenerator() {
+        if (coro) coro.destroy();
     }
 
-    // Check for tasks to compute
-    if(tasksRemaining == 0) {
-        cout << "No tasks to compute\n";
-        return;
+    bool next() {
+        if (!coro.done()) {
+            coro.resume();
+            return true;
+        }
+        return false;
     }
 
-    // Generate tasks and wait for their completion
-    while (!stopThreads && (currentTaskRow < a.size() || !taskQueue.empty())) {
-        // Generate task
-        {
-            lock_guard<mutex> lock(queueMutex);
-            taskQueue.push({currentTaskRow, currentTaskCol});
-        }
-        taskAvailable.notify_one();
+    Task getValue() {
+        return coro.promise().currentTask;
+    }
+};
 
-        // Wait for task completion
-        {
-            unique_lock<mutex> lock(computationMutex);
-            computationComplete.wait(lock, []{ return taskQueue.empty(); });
-        }
-
-        // Move to the next task
-        currentTaskCol++;
-        if (currentTaskCol == b[0].size()) {
-            currentTaskCol = 0;
-            currentTaskRow++;
+TaskGenerator generateTasks(int rows, int cols) {
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            co_yield Task{i, j};
         }
     }
 }
 
-void computationThread(const Matrix &a, const Matrix &b, Matrix &result) {
-    // Compute tasks until there are no tasks remaining
-    while (tasksRemaining > 0 || !taskQueue.empty()) {
-        Task task;
-        // Get task
-        {
-            unique_lock<mutex> lock(queueMutex);
-            taskAvailable.wait(lock, []{ return !taskQueue.empty() || stopThreads; });
-            if (stopThreads) break;
-            task = taskQueue.front();
-            taskQueue.pop();
-        }
-
-        // Perform calculation
-        result[task.row][task.col] = 0; // Initialize cell first
+void perform_matrix_multiplication_using_coroutines(const Matrix &a, const Matrix &b, Matrix &result) {
+    TaskGenerator tasks = generateTasks(a.size(), b[0].size());
+    while (tasks.next()) {
+        Task task = tasks.getValue();
+        result[task.row][task.col] = 0;
         for (int k = 0; k < a[0].size(); ++k) {
             result[task.row][task.col] += a[task.row][k] * b[k][task.col];
         }
-
-        // Notify task completion
-        {
-            lock_guard<mutex> lock(computationMutex);
-            computationComplete.notify_one();
-        }
-        tasksRemaining--; // Decrement after successful computation
     }
 }

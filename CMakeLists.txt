@@ -8,6 +8,6 @@ add_executable(osProject main.cpp
         matrix_thread.cpp
         matrix_event.cpp
         matrix_event.h
-        KeyValueStore.cpp
-        KeyValueStore.h)
+        key_value_store.cpp
+        key_value_store.h)
 

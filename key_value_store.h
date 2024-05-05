@@ -2,8 +2,8 @@
 // Created by Siddhartha Malladi on 5/5/24.
 //
 
-#ifndef OSPROJECT_KEYVALUESTORE_H
-#define OSPROJECT_KEYVALUESTORE_H
+#ifndef OSPROJECT_KEY_VALUE_STORE_H
+#define OSPROJECT_KEY_VALUE_STORE_H
 
 #include <string>
 #include <unordered_map>
@@ -14,5 +14,8 @@
 
 using namespace std;
 
+class key_value_store {
 
-#endif //OSPROJECT_KEYVALUESTORE_H
+};
+
+#endif //OSPROJECT_KEY_VALUE_STORE_H

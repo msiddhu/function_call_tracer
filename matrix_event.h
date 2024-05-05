@@ -28,9 +28,7 @@ extern std::condition_variable computationComplete; // For signaling task comple
 extern std::mutex computationMutex;
 extern std::atomic<int> tasksRemaining;
 
-
-void listenerThread(const Matrix &a, const Matrix &b, Matrix &result);
-void computationThread(const Matrix &a, const Matrix &b, Matrix &result);
+void perform_matrix_multiplication_using_coroutines(const Matrix &a, const Matrix &b, Matrix &result);
 
 
 #endif //OSPROJECT_MATRIX_EVENT_H

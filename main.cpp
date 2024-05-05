@@ -4,6 +4,7 @@
 #include <__random/random_device.h>
 #include "matrix_thread.h"
 #include "matrix_event.h"
+#include "key_value_store.h"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ using namespace std;
 void performMatrixMultiplication() {
     vector<int> matrixSizes = {1,10,100,1000,2000};
     for(int matrixSize : matrixSizes) {
-        stopThreads = false;
+
         cout << "Matrix Size: " << matrixSize<<endl;
 
         Matrix a = generateMatrix(matrixSize, matrixSize);
@@ -28,28 +29,29 @@ void performMatrixMultiplication() {
         cout << " Threaded: " << elapsedTime.count() << " ms"<<endl;
 
         Matrix resultEvent(a.size(), vector<int>(b[0].size(), 0));
-        tasksRemaining = matrixSize * matrixSize;
 
         startTime = chrono::high_resolution_clock::now();
-        thread listener(listenerThread, ref(a), ref(b), ref(resultEvent));
-        thread worker(computationThread, ref(a), ref(b), ref(resultEvent));
-
-        while(tasksRemaining > 0) {
-            this_thread::sleep_for(chrono::milliseconds(1));
-        }
-
-        stopThreads = true;
-        taskAvailable.notify_all();
-        listener.join();
-        worker.join();
-
+        perform_matrix_multiplication_using_coroutines(a, b, resultEvent);
         elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime);
         cout << " Coroutines: " << elapsedTime.count() << " ms"<<endl;
         cout<<endl;
     }
 }
 
-void performKeyValueStoreOperations
+//void performKeyValueStoreOperations(){
+//    key_value_store keyValueStore;
+//    keyValueStore.set("key1", "value1");
+//    keyValueStore.set("key2", "value2");
+//    keyValueStore.set("key3", "value3");
+//
+//    cout << "Value for key1: " << keyValueStore.get("key1") << endl;
+//    cout << "Value for key2: " << keyValueStore.get("key2") << endl;
+//    cout << "Value for key3: " << keyValueStore.get("key3") << endl;
+//
+//    keyValueStore.remove("key2");
+//    cout << "Value for key2 after removal: " << keyValueStore.get("key2") << endl;
+//
+//}
 
 
 
