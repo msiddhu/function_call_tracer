@@ -1,9 +1,7 @@
 #include <coroutine>
 #include <iostream>
-#include <vector>
 
 using namespace std;
-using Matrix = vector<vector<int>>;
 
 struct Task {
     int row, col;
@@ -54,12 +52,12 @@ TaskGenerator generateTasks(int rows, int cols) {
     }
 }
 
-void perform_matrix_multiplication_using_coroutines(const Matrix &a, const Matrix &b, Matrix &result) {
-    TaskGenerator tasks = generateTasks(a.size(), b[0].size());
+void perform_matrix_multiplication_using_coroutines(int** a, int** b, int** result, int rows, int cols) {
+    TaskGenerator tasks = generateTasks(rows, cols);
     while (tasks.next()) {
         Task task = tasks.getValue();
         result[task.row][task.col] = 0;
-        for (int k = 0; k < a[0].size(); ++k) {
+        for (int k = 0; k < rows; ++k) {
             result[task.row][task.col] += a[task.row][k] * b[k][task.col];
         }
     }

@@ -11,10 +11,8 @@
 #include <condition_variable>
 #include <mutex>
 #include <atomic>
-#include <vector>
 #include <iostream>
 
-using Matrix = std::vector<std::vector<int>>;
 
 struct Task {
     int row, col;
@@ -28,7 +26,7 @@ extern std::condition_variable computationComplete; // For signaling task comple
 extern std::mutex computationMutex;
 extern std::atomic<int> tasksRemaining;
 
-void perform_matrix_multiplication_using_coroutines(const Matrix &a, const Matrix &b, Matrix &result);
+void perform_matrix_multiplication_using_coroutines(int** a, int** b, int** result, int rows, int cols);
 
 
 #endif //OSPROJECT_MATRIX_EVENT_H

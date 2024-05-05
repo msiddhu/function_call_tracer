@@ -8,14 +8,13 @@
 #include <iostream>
 #include <vector>
 #include <thread>
-#include <__random/random_device.h>
-#include <__random/mersenne_twister_engine.h>
 using namespace std;
 
-typedef std::vector<std::vector<int>> Matrix;
-Matrix generateMatrix(int rows, int cols);
-void multiplyMatrixBlock(const Matrix &a, const Matrix &b, Matrix &result, int startRow, int endRow);
-Matrix multiplyMatricesUsingThreads(const Matrix &a, const Matrix &b);
+typedef int** Matrix;
+
+int** generateMatrix(int rows, int cols);
+void multiplyMatrixBlock(int** a, int** b, int** result, int startRow, int endRow, int commonDimension);
+int** multiplyMatricesUsingThreads(int** a, int** b, int rows, int cols, int commonDimension);
 
 
 
