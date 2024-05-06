@@ -1,10 +1,15 @@
+//
+// Created by Siddhartha Malladi on 5/5/24.
+//
 #include <coroutine>
 #include <iostream>
+#include "common.h"
+
 
 using namespace std;
 
 struct Task {
-    int row, col;
+    int row, col, k;
 };
 
 struct TaskGenerator {
@@ -44,21 +49,50 @@ struct TaskGenerator {
     }
 };
 
-TaskGenerator generateTasks(int rows, int cols) {
+TaskGenerator generateTasks(int rows, int cols, int commonDimension) {
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
-            co_yield Task{i, j};
+            for (int k = 0; k < commonDimension; ++k) {
+                co_yield Task{i, j, k};
+            }
         }
     }
 }
 
-void perform_matrix_multiplication_using_coroutines(int** a, int** b, int** result, int rows, int cols) {
-    TaskGenerator tasks = generateTasks(rows, cols);
+void perform_matrix_multiplication_using_coroutines(int** a, int** b, int** result, int rows, int cols, int commonDimension) {
+    TaskGenerator tasks = generateTasks(rows, cols, commonDimension);
     while (tasks.next()) {
         Task task = tasks.getValue();
-        result[task.row][task.col] = 0;
-        for (int k = 0; k < rows; ++k) {
-            result[task.row][task.col] += a[task.row][k] * b[k][task.col];
-        }
+        result[task.row][task.col] += a[task.row][task.k] * b[task.k][task.col];
     }
 }
+
+int main() {
+
+    int matrixSizes[] = {1,10,100,1000,2000};
+    int size = sizeof(matrixSizes) / sizeof(matrixSizes[0]);
+    for(int i=0; i<size; i++){
+        int matrixSize = matrixSizes[i];
+        cout << "Matrix Size: " << matrixSize << endl;
+        int** a = generateMatrix(matrixSize, matrixSize);
+        int** b = generateMatrix(matrixSize, matrixSize);
+        int** resultEvent = new int*[matrixSize];
+        for(int j = 0; j < matrixSize; ++j) {
+            resultEvent[j] = new int[matrixSize]();
+        }
+        perform_matrix_multiplication_using_coroutines(a, b, resultEvent, matrixSize, matrixSize, matrixSize);
+        for(int j = 0; j < matrixSize; ++j) {
+            delete[] a[j];
+            delete[] b[j];
+            delete[] resultEvent[j];
+        }
+        delete[] a;
+        delete[] b;
+        delete[] resultEvent;
+
+    }
+
+    return 0;
+}
+
+

@@ -1,37 +1,7 @@
-//
-// Created by Siddhartha Malladi on 5/3/24.
-//
-
 #include <thread>
-#include "matrix_thread.h"
+#include "common.h"
 
 using namespace std;
-
-// Simple pseudo-random number generator
-int rand() {
-    static unsigned long x = 123456789, y = 362436069, z = 521288629;
-    unsigned long t;
-    x ^= x << 16;
-    x ^= x >> 5;
-    x ^= x << 1;
-    t = x;
-    x = y;
-    y = z;
-    z = t ^ x ^ y;
-    return z % 100 + 1; // Returns a number between 1 and 100
-}
-
-// Generate a random matrix
-int** generateMatrix(int rows, int cols) {
-    int** matrix = new int*[rows];
-    for(int i = 0; i < rows; ++i) {
-        matrix[i] = new int[cols];
-        for(int j = 0; j < cols; ++j) {
-            matrix[i][j] = rand();
-        }
-    }
-    return matrix;
-}
 
 void multiplyMatrixBlock(int** a, int** b, int** result, int startRow, int endRow, int commonDimension) {
     for(int i = startRow; i < endRow; ++i) {
@@ -63,6 +33,40 @@ int** multiplyMatricesUsingThreads(int** a, int** b, int rows, int cols, int com
     for(auto &th : threads) {
         th.join();
     }
-
     return result;
+}
+
+
+
+int main() {
+    int matrixSizes[] = {1,10,100,1000,2000};
+    int size = sizeof(matrixSizes) / sizeof(matrixSizes[0]);
+
+    for(int i = 0; i < size; ++i) {
+        int matrixSize = matrixSizes[i];
+
+        cout << "Matrix Size: " << matrixSize << endl;
+
+        int** a = generateMatrix(matrixSize, matrixSize);
+        int** b = generateMatrix(matrixSize, matrixSize);
+
+        int** resultThread = multiplyMatricesUsingThreads(a, b, matrixSize, matrixSize, matrixSize);
+
+        int** resultEvent = new int*[matrixSize];
+        for(int j = 0; j < matrixSize; ++j) {
+            resultEvent[j] = new int[matrixSize];
+        }
+        // Don't forget to deallocate the memory
+        for(int j = 0; j < matrixSize; ++j) {
+            delete[] a[j];
+            delete[] b[j];
+            delete[] resultThread[j];
+            delete[] resultEvent[j];
+        }
+        delete[] a;
+        delete[] b;
+        delete[] resultThread;
+        delete[] resultEvent;
+    }
+    return 0;
 }

@@ -3,13 +3,39 @@ project(osProject)
 
 set(CMAKE_CXX_STANDARD 20)
 
-# Add compile options
-#add_compile_options(-O0 -g -finstrument-functions -rdynamic)
+add_library(hooks SHARED hooks.cpp)
+target_compile_options(hooks PRIVATE -O0 -g -rdynamic)
+target_link_libraries(hooks dl)
 
-add_executable(matrix matrix.cpp
-        matrix_thread.h
-        matrix_thread.cpp
-        matrix_event.cpp
-        matrix_event.h
+
+# Compile matrix_event.cpp into an executable
+add_executable(matrix_event matrix_event.cpp common.cpp
+        keyvalue_thread.cpp
+        keyvalue.cpp
+        keyvalue.h)
+target_compile_options(matrix_event PRIVATE -O0 -g -finstrument-functions -rdynamic)
+target_link_libraries(matrix_event hooks)
+
+# Compile matrix_thread.cpp into an executable
+add_executable(matrix_thread matrix_thread.cpp common.cpp
+        keyvalue.cpp
+        keyvalue.h)
+target_compile_options(matrix_thread PRIVATE -O0 -g -finstrument-functions -rdynamic)
+target_link_libraries(matrix_thread hooks)
+
+add_executable(keyvalue_thread keyvalue_thread.cpp common.cpp
+        keyvalue.cpp
+        keyvalue.h)
+#target_compile_options(keyvalue_thread PRIVATE -O0 -g -finstrument-functions -rdynamic)
+#target_link_libraries(keyvalue_thread hooks)
+
+add_executable(keyvalue_event keyvalue_event.cpp common.cpp
+        keyvalue.cpp
+        keyvalue.h)
+
+# Set the LD_PRELOAD environment variable to preload the hooks shared library
+set_target_properties(matrix_event PROPERTIES
+        ENVIRONMENT "LD_PRELOAD=$<TARGET_FILE:hooks>"
 )
+
 
