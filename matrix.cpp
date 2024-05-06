@@ -16,18 +16,18 @@ void performMatrixMultiplication() {
         int** a = generateMatrix(matrixSize, matrixSize);
         int** b = generateMatrix(matrixSize, matrixSize);
 
-        auto startTime = chrono::high_resolution_clock::now();
+//        auto startTime = chrono::high_resolution_clock::now();
         int** resultThread = multiplyMatricesUsingThreads(a, b, matrixSize, matrixSize, matrixSize);
-        auto elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime);
-        cout << " Threaded: " << elapsedTime.count() << " ms" << endl;
+//        auto elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime);
+//        cout << " Threaded: " << elapsedTime.count() << " ms" << endl;
 
         // Assuming perform_matrix_multiplication_using_coroutines is also modified to use dynamic arrays
         int** resultEvent = generateMatrix(matrixSize, matrixSize);
-        startTime = chrono::high_resolution_clock::now();
+//        startTime = chrono::high_resolution_clock::now();
         perform_matrix_multiplication_using_coroutines(a, b, resultEvent, matrixSize, matrixSize);
-        elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime);
-        cout << " Coroutines: " << elapsedTime.count() << " ms" << endl;
-        cout << endl;
+//        elapsedTime = chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - startTime);
+//        cout << " Coroutines: " << elapsedTime.count() << " ms" << endl;
+//        cout << endl;
 
         // Don't forget to deallocate the memory
         for(int i = 0; i < matrixSize; ++i) {
