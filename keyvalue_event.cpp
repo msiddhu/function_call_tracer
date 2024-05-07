@@ -2,6 +2,15 @@
 #include "common.h"
 #include <coroutine>
 
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <vector>
+#include <algorithm>
+#include <random>
+#include <coroutine>
+
 using namespace std;
 
 struct Task {
@@ -52,29 +61,34 @@ TaskGenerator generateTasks(vector<Operation>& operations) {
 }
 
 int main() {
-    keyvalue kv;
-    vector<Operation> operations;
-    operations = generateWorkload(100000, 0.1, 0.9);
 
-    // set timers
-    auto start = std::chrono::high_resolution_clock::now();
+    int numberOperations[] = {1000, 10000, 100000, 1000000,10000000,100000000};
+    cout<< "KeyValue Store using Events" << endl;
+    for(int numOperations: numberOperations) {
+        keyvalue kv;
+        vector<Operation> operations;
 
-    TaskGenerator tasks = generateTasks(operations);
-    while (tasks.next()) {
-        Task task = tasks.getValue();
-        if (task.operation.type == OperationType::GET) {
-            kv.get(task.operation.key);
-        } else if (task.operation.type == OperationType::SET) {
-            kv.set(task.operation.key, task.operation.value);
-        } else if (task.operation.type == OperationType::DEL) {
-            kv.del(task.operation.key);
-        } else if (task.operation.type == OperationType::RANGE_QUERY) {
-            kv.rangeQuery(task.operation.key, task.operation.value);
+        operations = generateWorkload(numOperations, 0.5, 0.5);
+
+        // set timers
+        auto start = std::chrono::high_resolution_clock::now();
+
+        TaskGenerator tasks = generateTasks(operations);
+        while (tasks.next()) {
+            Task task = tasks.getValue();
+            if (task.operation.type == OperationType::GET) {
+                kv.get(task.operation.key);
+            } else if (task.operation.type == OperationType::SET) {
+                kv.set(task.operation.key, task.operation.value);
+            } else if (task.operation.type == OperationType::DEL) {
+                kv.del(task.operation.key);
+            } else if (task.operation.type == OperationType::RANGE_QUERY) {
+                kv.rangeQuery(task.operation.key, task.operation.value);
+            }
         }
+        auto elapsed = std::chrono::high_resolution_clock::now() - start;
+        cout << "Operations " << numOperations << " Time taken: "
+             << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << " ms" << endl;
     }
-
-    auto elapsed = std::chrono::high_resolution_clock::now() - start;
-    cout << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << " ms" << endl;
-
     return 0;
 }

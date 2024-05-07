@@ -5,19 +5,27 @@
 #include <random>
 
 int main() {
-    keyvalue kv;
-    std::vector<std::thread> threads;
-    vector<Operation> operations;
-    operations = generateWorkload(100000, 0.5, 0.4); // 10,000 operations
 
-    // set timers
-    auto start = std::chrono::high_resolution_clock::now();
+    int numberOperations[] = {1000, 10000, 100000, 1000000,10000000,100000000};
+    cout<< "KeyValue Store using Threads" << endl;
+    for(int i = 0; i < sizeof(numberOperations) / sizeof(numberOperations[0]); ++i) {
+        int numOperations = numberOperations[i];
+        keyvalue kv;
 
-    int numThreads = 10; // Use 10 threads
-    int operationsPerThread = operations.size() / numThreads;
 
-    threads.reserve(numThreads);
-    for (int t = 0; t < numThreads; ++t) {
+        vector<std::thread> threads;
+        vector<Operation> operations;
+
+        operations = generateWorkload(numOperations, 0.5, 0.5);
+
+        // set timers
+        auto start = std::chrono::high_resolution_clock::now();
+
+        int numThreads = 10; // Use 10 threads
+        int operationsPerThread = operations.size() / numThreads;
+
+        threads.reserve(numThreads);
+        for (int t = 0; t < numThreads; ++t) {
             threads.emplace_back([&kv, &operations, t, operationsPerThread, &numThreads]() {
                 int startOp = t * operationsPerThread;
                 int endOp = (t == numThreads - 1) ? operations.size() : startOp + operationsPerThread;
@@ -36,12 +44,13 @@ int main() {
             });
         }
 
-    for (auto& thread : threads) {
-        thread.join();
+        for (auto &thread: threads) {
+            thread.join();
+        }
+
+        auto elapsed = std::chrono::high_resolution_clock::now() - start;
+        cout << "Operations " << numOperations << " Time taken: "
+             << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << " ms" << endl;
     }
-
-    auto elapsed = std::chrono::high_resolution_clock::now() - start;
-    cout << "Time taken: " << std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count() << " ms" << endl;
-
     return 0;
 }

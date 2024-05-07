@@ -2,9 +2,6 @@
 // Created by Siddhartha Malladi on 5/5/24.
 //
 
-#ifndef OSPROJECT_KEYVALUE_H
-#define OSPROJECT_KEYVALUE_H
-
 #include <mutex>
 #include <unordered_map>
 #include <string>
@@ -46,5 +43,3 @@ private:
     std::mutex storeMutex;
 };
 
-
-#endif //OSPROJECT_KEYVALUE_H
