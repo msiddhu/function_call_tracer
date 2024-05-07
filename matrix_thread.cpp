@@ -39,34 +39,29 @@ int** multiplyMatricesUsingThreads(int** a, int** b, int rows, int cols, int com
 
 
 int main() {
+    cout<<"Matrix Multiplication using Threads"<<endl;
     int matrixSizes[] = {1,10,100,1000,2000};
     int size = sizeof(matrixSizes) / sizeof(matrixSizes[0]);
 
     for(int i = 0; i < size; ++i) {
         int matrixSize = matrixSizes[i];
-
-        cout << "Matrix Size: " << matrixSize << endl;
-
         int** a = generateMatrix(matrixSize, matrixSize);
         int** b = generateMatrix(matrixSize, matrixSize);
 
+        auto start = chrono::high_resolution_clock::now();
         int** resultThread = multiplyMatricesUsingThreads(a, b, matrixSize, matrixSize, matrixSize);
+        auto end = chrono::high_resolution_clock::now();
+        cout <<"Matrix Size: "<<matrixSize<< " Time taken: " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << "ms" << endl;
 
-        int** resultEvent = new int*[matrixSize];
-        for(int j = 0; j < matrixSize; ++j) {
-            resultEvent[j] = new int[matrixSize];
-        }
         // Don't forget to deallocate the memory
         for(int j = 0; j < matrixSize; ++j) {
             delete[] a[j];
             delete[] b[j];
             delete[] resultThread[j];
-            delete[] resultEvent[j];
         }
         delete[] a;
         delete[] b;
         delete[] resultThread;
-        delete[] resultEvent;
     }
     return 0;
 }
