@@ -11,7 +11,7 @@ using namespace std;
 
 std::vector<Operation> generateWorkload(int numOperations, double readRatio, double writeRatio) {
     std::vector<Operation> workload;
-    workload.reserve(numOperations); // Pre-allocate for efficiency
+    workload.reserve(numOperations);
 
     // Custom random number generator
     auto randCustom = []() -> int {
@@ -24,10 +24,9 @@ std::vector<Operation> generateWorkload(int numOperations, double readRatio, dou
         x = y;
         y = z;
         z = t ^ x ^ y;
-        return z % 1000 + 1; // Returns a number between 1 and 1000
+        return z % 1000 + 1;
     };
 
-    // Custom uniform distribution
     auto uniformDist = [&randCustom](double min, double max) -> double {
         return min + (max - min) * (double(randCustom()) / 1000.0);
     };

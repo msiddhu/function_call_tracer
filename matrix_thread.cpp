@@ -40,7 +40,8 @@ int** multiplyMatricesUsingThreads(int** a, int** b, int rows, int cols, int com
 
 int main() {
     cout<<"Matrix Multiplication using Threads"<<endl;
-    int matrixSizes[] = {1,10,100,1000,2000};
+//    int matrixSizes[] = {1,10,100,1000,2000};
+    int matrixSizes[] = {1};
     int size = sizeof(matrixSizes) / sizeof(matrixSizes[0]);
 
     for(int i = 0; i < size; ++i) {
